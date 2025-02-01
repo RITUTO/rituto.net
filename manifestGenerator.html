@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイクラmanifestジェネレーター</title>
+        <script src="https://code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://rituto.net/style.css" type="text/css">
+</head>
+<script src="sidber.js"></script>
+<div id="l"></div>
+
+<body>
+    <div class="container">
+        <p>作品のタイトル</p>
+        <input type="text" id="title" placeholder="">
+        <p>作品の説明</p>
+        <textarea id="description" class="description"></textarea>
+        <p>タイプ</p>
+        <label class="box">
+            <select id="a">
+                <option value="noselect">未選択</option>
+                <option value="texture">リソースパック</option>
+                <option value="behavior">ビヘイビアー</option>
+                <option value="script">script api(gametest)</option>
+            </select>
+        </label>
+        <p>メインフォルダー(タイプがscript api(gametest)の時のみ)</p>
+        <label class="box">
+            <select id="b">
+                <option value="noselect">未選択</option>
+                <option value="index.js">index.js</option>
+                <option value="main.js">main.js</option>
+                <option value="script.js">script.js</option>
+            </select>
+        </label>
+        <p></p>
+        <br>
+        <button onclick="a()">生成</button> <button onclick="if (document.getElementById('t').value == ``){
+            alert('エラー生成されてないためコピーできませんでした')
+            return false
+        }else{
+            copyToClipboard(document.getElementById('t').value)
+            alert('クリップボードにコピーしました')
+        }
+        ">クリップボードにコピー</button><button onclick="hozonn()">保存</button>
+
+        <p>生成した結果</p>
+        <textarea readonly id="t" class="t"></textarea>
+    </div>
+    <script>
+        function hozonn(){
+            if (document.getElementById('t').value == ``){
+            alert('エラー生成されてないためコピーできませんでした')
+            return false
+        }
+        var blob = new Blob([document.getElementById('t').value], { type: 'text/html' });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "manifest.json";
+        link.click();
+    
+
+        }
+        function a(){
+        const type = document.getElementById('a').value
+        const title = document.getElementById('title').value
+        const description = document.getElementById('description').value
+        const scripttype = document.getElementById('b').value
+
+        var ver = "1.17.0-beta"
+
+ if (title == ""){
+            alert('タイトルを記入してください')
+return false
+        }else if (description == ""){
+            alert('説明を記入してください')
+return false
+        }        if (type == 'noselect'){
+            alert('タイプを未選択にはできません')
+            return false
+        }
+        if (type == 'texture'){
+           document.getElementById('t').value = `
+{
+  "format_version": 1,
+  "header": {
+    "description": "${description}",
+    "name": "${title}",
+    "uuid": "${uuid()}",
+    "version": [0, 0, 1]
+  },
+  "modules": [
+    {
+      "description": "${description}",
+      "type": "resources",
+      "uuid": "${uuid()}",
+      "version": [0, 0, 1]
+    }
+  ]
+}
+           
+           `
+ 
+}else if (type == "behavior"){
+    document.getElementById('t').value = `
+    {
+  "format_version": 1,
+  "header": {
+    "description": "${description}",
+    "name": "${title}",
+    "uuid": "${uuid()}",
+    "version": [0, 0, 1]
+  },
+  "modules": [
+    {
+      "description": "${description}",
+      "type": "data",
+      "uuid": "${uuid()}",
+      "version": [0, 0, 1]
+    }
+  ]
+}
+           
+           `
+}else if (type == "script"){
+    if (scripttype == 'noselect'){
+            alert('メインフォルダーを未選択にはできません')
+            return false
+        }
+    document.getElementById('t').value = `
+    {
+	"format_version": 2,
+	"header": {
+		"name": "${title}",
+		"description": "${description}",
+		"uuid": "${uuid()}",
+		"version": [
+			0,
+			0,
+			1
+		],
+		"min_engine_version": [
+			1,
+			20,
+			51
+		]
+	},
+	"modules": [
+		{
+			"description": "Script resources",
+			"language": "javascript",
+			"type": "script",
+			"uuid": "${uuid()}",
+			"version": [
+				0,
+				0,
+				1
+			],
+			"entry": "scripts/${scripttype}"
+		}
+	],
+	"dependencies": [
+		{
+			"module_name": "@minecraft/server",
+			"version": "${ver}"
+		},
+		{
+			"module_name": "@minecraft/server-ui",
+			"version": "1.4.0-beta"
+		}
+	]
+}
+           
+           `
+}
+}
+function uuid(){
+            return self.crypto.randomUUID();
+        }
+        function copyToClipboard (tagValue) {
+  if (navigator.clipboard) {
+    return navigator.clipboard.writeText(tagValue).then(function () {
+      messageActive()
+    })
+  } else {
+    tagText.select()
+    document.execCommand('copy')
+    messageActive()
+  }
+}
+
+    </script>
+    <style>
+    @media screen and (max-width: 480px) {
+    input[type="submit"],
+    button {
+    width:100%;
+    height:50px;
+    }
+    input {
+    padding: 8px;
+    border: 1px solid #3461a4;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    background-size: 16px;
+    background-position: 8px 50%;
+    background-repeat: no-repeat;
+    width:200px;
+    height:50px;
+    }
+    }
+        .s {
+    margin-top: -11px;
+    margin-left: -10px;
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    color: #ffffff;
+    border: none;
+    border-radius: -5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+
+
+        button {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+
+        p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 10px;
+        }
+
+        html {
+            background-color: #cae4ff;
+            color: #000000;
+        }
+
+        textarea {
+            padding: 8px;
+            border: 1px solid #3461a4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            background-size: 16px;
+            background-position: 8px 50%;
+            background-repeat: no-repeat;
+            padding-left: 30px;
+        }
+
+        textarea :hover {
+            background-color: #3461a4;
+
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #3461a4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            background-size: 16px;
+            background-position: 8px 50%;
+            background-repeat: no-r
+        }
+
+        #description {
+            width: 50%;
+            height: 200px;
+            /* お好みの高さに調整してください */
+            padding: 8px;
+            border: 1px solid #3461a4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            background-size: 16px;
+            background-position: 8px 50%;
+            resize: none;
+            /* ユーザーによるサイズ変更を無効化 */
+        }
+
+        #t {
+            width: 50%;
+            height: 350px;
+            /* お好みの高さに調整してください */
+            padding: 8px;
+            border: 1px solid #3461a4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            background-size: 16px;
+            background-position: 8px 50%;
+            resize: none;
+            /* ユーザーによるサイズ変更を無効化 */
+        }
+
+        .box {
+            position: relative;
+        }
+
+        .box::before,
+        .box::after {
+            position: absolute;
+            content: '';
+            pointer-events: none;
+        }
+
+        .box::before {
+            display: inline-block;
+            right: 0;
+            width: 2.8em;
+            height: 2.8em;
+            border-radius: 0 3px 3px 0;
+            background-color: #2589d0;
+        }
+
+        .box::after {
+            position: absolute;
+            top: 50%;
+            right: 1.4em;
+            transform: translate(50%, -50%) rotate(45deg);
+            width: 6px;
+            height: 6px;
+            border-bottom: 3px solid #fff;
+            border-right: 3px solid #fff;
+        }
+
+        .box select {
+            appearance: none;
+            min-width: 230px;
+            height: 2.8em;
+            padding: .4em 3.6em .4em .8em;
+            border: none;
+            border-radius: 3px;
+            background-color: #f2f2f2;
+            color: #333;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .box select:focus {
+            outline: 2px solid #2589d0;
+        }
+
+       
+
+        .radio-2 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3em 2em;
+            border: none;
+        }
+
+        .radio-2 label {
+            display: flex;
+            align-items: center;
+            gap: 0 .5em;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-2 label::before,
+        .radio-2 label::after {
+            border-radius: 50%;
+            content: '';
+        }
+
+        .radio-2 label::before {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #dee5eb;
+            box-sizing: border-box;
+        }
+
+        .radio-2 label::after {
+            position: absolute;
+            top: 50%;
+            left: 9px;
+            transform: translate(-50%, -50%);
+            width: 9px;
+            height: 9px;
+            background-color: #dee5eb;
+        }
+
+        .radio-2 label:has(:checked)::after {
+            background-color: #2589d0;
+            animation: anim-radio-2 .3s linear;
+        }
+
+        @keyframes anim-radio-2 {
+            0% {
+                box-shadow: 0 0 0 1px transparent;
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px #2589d033;
+            }
+
+            100% {
+                box-shadow: 0 0 0 10px transparent;
+            }
+        }
+
+        .radio-2 input {
+            display: none;
+        }
+
+        .radio-2 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3em 2em;
+            border: none;
+            margin-bottom: 10px;
+            /* ラジオボタン全体の間隔 */
+        }
+
+        .radio-2 legend {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+
+</html>
